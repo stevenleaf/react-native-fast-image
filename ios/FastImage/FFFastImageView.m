@@ -221,10 +221,10 @@
                         if (error) {
                             weakSelf.hasErrored = YES;
                                 if (weakSelf.onFastImageError) {
-                                    weakSelf.onFastImageError(@{});
+                                    weakSelf.onFastImageError(@{@"code": [NSNumber numberWithInteger:error.code]});
                                 }
                                 if (weakSelf.onFastImageLoadEnd) {
-                                    weakSelf.onFastImageLoadEnd(@{});
+                                    weakSelf.onFastImageLoadEnd(@{@"code": [NSNumber numberWithInteger:error.code]});
                                 }
                         } else {
                             weakSelf.hasCompleted = YES;
