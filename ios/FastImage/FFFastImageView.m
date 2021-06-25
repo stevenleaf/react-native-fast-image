@@ -1,5 +1,9 @@
+
+
 #import "FFFastImageView.h"
 #import <SDWebImage/UIImage+MultiFormat.h>
+#import <SDWebImage/UIView+WebCache.h>
+#import <SDWebImage/SDWebImageDownloaderOperation.h>
 
 @interface FFFastImageView()
 
@@ -13,12 +17,16 @@
 
 @end
 
+@interface S6RedirectRetryDownloaderOperation : SDWebImageDownloaderOperation
+@end
+
 @implementation FFFastImageView
 
 - (id) init {
     self = [super init];
     self.resizeMode = RCTResizeModeCover;
     self.clipsToBounds = YES;
+    [SDWebImageDownloader sharedDownloader].config.operationClass = S6RedirectRetryDownloaderOperation.class;
     return self;
 }
 
@@ -228,5 +236,25 @@
                     }];
 }
 
+- (void)dealloc {
+    [self sd_cancelCurrentImageLoad];
+}
+
 @end
 
+@implementation S6RedirectRetryDownloaderOperation
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task willPerformHTTPRedirection:(NSHTTPURLResponse *)response newRequest:(NSURLRequest *)request completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler {
+    if (response.statusCode != 302) {
+        completionHandler(request);
+        return;
+    }
+    
+    if ([request.URL.absoluteString containsString:@"society6/placeholder"]) {
+        [self cancel];
+    } else {
+        completionHandler(request);
+    }
+}
+
+@end
